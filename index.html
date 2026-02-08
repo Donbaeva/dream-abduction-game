@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Похищение во сне</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+body {
+    margin: 0;
+    font-family: 'Press Start 2P', monospace;
+    color: white;
+    overflow: hidden;
+    background: #000;
+}
+
+/* Сцена */
+#scene {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ФОН ИЗОБРАЖЕНИЯ */
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.9;
+}
+
+/* Затемнение */
+.gif-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+/* Фото */
+#memoryPhoto {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    max-height: 70%;
+    border-radius: 15px;
+    display: none;
+    z-index: 2;
+    border: 3px solid white;
+    box-shadow: 0 0 20px rgba(255, 95, 125, 0.7);
+    object-fit: contain;
+}
+/* Дополнительные стили для галереи */
+.memory-gallery {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 800px;
+    max-width: 90%;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 30px;
+    border-radius: 20px;
+    border: 3px solid #ff5f7d;
+    box-shadow: 0 0 40px rgba(255, 95, 125, 0.5);
+}
+
+.memory-photo {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    background: linear-gradient(145deg, #2a1a3a, #1a0a2a);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.memory-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.5s ease;
+    filter: blur(5px) grayscale(80%) brightness(0.8); /* УМЕНЬШЕНО РАЗМЫТИЕ */
+}
+
+.memory-photo:hover img {
+    filter: blur(3px) grayscale(40%) brightness(1); /* УМЕНЬШЕНО РАЗМЫТИЕ ПРИ НАВЕДЕНИИ */
+    transform: scale(1.05);
+}
+
+.memory-photo .photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    transition: all 0.4s ease;
+    text-align: center;
+    padding: 10px;
+}
+
+.memory-photo:hover .photo-overlay {
+    background: rgba(255, 95, 125, 0.7);
+    font-size: 16px;
+    backdrop-filter: blur(5px);
+}
+
+/* Эффект вспышки при клике */
+@keyframes memoryFlash {
+    0% { 
+        background: rgba(255, 255, 255, 0);
+        transform: scale(1);
+    }
+    50% { 
+        background: rgba(255, 255, 255, 0.8);
+        transform: scale(1.02);
+    }
+    100% { 
+        background: rgba(255, 255, 255, 0);
+        transform: scale(1);
+    }
+}
+
+.memory-flash {
+    animation: memoryFlash 0.6s ease-out;
+}
+
+/* Текст */
+#text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+    line-height: 1.6;
+    text-shadow: 2px 2px 4px #000;
+    max-width: 90%;
+    z-index: 3;
+    position: relative;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 10px;
+}
+
+/* Хаб */
+#hub {
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle, rgba(20,20,40,1) 0%, rgba(0,0,10,1) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Фон для хаба */
+.hub-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.3;
+}
+
+/* Контент хаба */
+.hub-content {
+    z-index: 2;
+    position: relative;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    border-radius: 15px;
+    border: 2px solid #ff5f7d;
+    max-width: 90%;
+    margin: 20px;
+}
+
+/* Кнопки */
+button {
+    margin: 12px;
+    padding: 15px 35px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 12px;
+    border: 2px solid #fff;
+    background: linear-gradient(145deg, #ff5f7d, #ff9a9e);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255,0,100,0.4);
+    transition: 0.3s;
+    font-family: 'Press Start 2P', monospace;
+    z-index: 4;
+    position: relative;
+}
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(255,0,100,0.6);
+}
+
+/* Мерцающий портал */
+.portal {
+    opacity: 0.3;
+    pointer-events: none;
+    animation: glow 1.5s infinite alternate;
+}
+.portal.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+@keyframes glow {
+    0% { 
+        box-shadow: 0 0 10px #ff5f7d;
+        transform: scale(1);
+    }
+    100% { 
+        box-shadow: 0 0 25px #ff9a9e, 0 0 40px #ff5f7d;
+        transform: scale(1.05);
+    }
+}
+
+/* Кнопка музыки */
+#musicBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+/* Контейнер для выбора */
+#choices {
+    z-index: 3;
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90%;
+}
+
+/* Анимация пульсации */
+@keyframes pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+.pulse-text {
+    animation: pulse 2s infinite;
+}
+
+/* Экран загрузки */
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
+    font-size: 24px;
+    transition: opacity 0.5s;
+}
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ff5f7d;
+    border-top: 5px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Мини-игры */
+.mini-game {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.game-container {
+    width: 800px;
+    height: 600px;
+    position: relative;
+    border: 3px solid #ff5f7d;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0a0a1a;
+}
+.game-info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 20px;
+    z-index: 10;
+}
+#game1Canvas, #game2Canvas, #game3Canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.game-controls {
+    margin-top: 20px;
+    text-align: center;
+}
+.instructions {
+    color: #ff9a9e;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+/* Финальная сцена */
+#finalKissScene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.kiss-container {
+    width: 800px;
+    height: 600px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kiss-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+}
+.kiss-image {
+    position: absolute;
+    width: 500px;
+    height: 333px;
+    z-index: 2;
+    transition: transform 0.5s;
+}
+
+/* Сцена пробуждения */
+#wakeUpScene {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 10001;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.wakeup-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+}
+.wakeup-text {
+    position: relative;
+    z-index: 2;
+    color: white;
+    text-align: center;
+    max-width: 80%;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #ff5f7d;
+}
+
+/* Анимации */
+@keyframes float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-15px) scale(1.05); }
+}
+@keyframes scaleUp {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes heartBurst {
+    0% { transform: scale(0.1); opacity: 1; }
+    100% { transform: scale(4); opacity: 0; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.float-animation {
+    animation: float 3s ease-in-out infinite;
+}
+.scale-animation {
+    animation: scaleUp 2s forwards;
+}
+.heart-burst {
+    position: absolute;
+    font-size: 50px;
+    color: #ff5f7d;
+    animation: heartBurst 2s ease-out;
+    pointer-events: none;
+    z-index: 3;
+}
+.fade-in {
+    animation: fadeIn 2s forwards;
+}
+
+/* Эффект сияния */
+@keyframes glowEffect {
+    0% { box-shadow: 0 0 10px #ff5f7d; }
+    50% { box-shadow: 0 0 40px #ff5f7d, 0 0 80px #ff9a9e; }
+    100% { box-shadow: 0 0 10px #ff5f7d; }
+}
+.glow-effect {
+    animation: glowEffect 2s infinite;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    #text { font-size: 16px; padding: 15px; }
+    button { padding: 12px 25px; font-size: 16px; margin: 8px; }
+    .hub-content { padding: 20px; }
+    #memoryPhoto { width: 80%; height: auto; }
+    .game-container { width: 95vw; height: 60vh; }
+    .kiss-container { width: 95vw; height: 60vh; }
+    .kiss-image { width: 350px; height: 233px; }
+}
+@media (max-width: 480px) {
+    #text { font-size: 14px; padding: 10px; }
+    button { padding: 10px 20px; font-size: 14px; margin: 5px; }
+    .hub-content h1 { font-size: 18px; }
+    .hub-content p { font-size: 12px; }
+    .kiss-image { width: 250px; height: 167px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Экран загрузки -->
+<div id="loadingScreen">
+    <div class="loader"></div>
+    <p id="loadingText">Загрузка миров...</p>
+</div>
+
+<!-- Основная сцена -->
+<div id="scene" style="display:none;">
+    <img id="backgroundImg" class="background-image" src="" alt="Фон">
+    <div class="gif-overlay"></div>
+    <div id="text"></div>
+    <div id="choices"></div>
+    <img id="memoryPhoto" src="">
+</div>
+
+<!-- Хаб с порталами -->
+<div id="hub" style="display:none;">
+    <img id="hubBackground" class="hub-background" src="" alt="Фон хаба">
+    <div class="hub-content">
+        <h1>Сон. Воспоминания разбросаны…</h1>
+        <p>Найди их, чтобы вернуть её.</p>
+        <div id="portals"></div>
+    </div>
+</div>
+
+<!-- Мини-игры -->
+<div id="miniGame1" class="mini-game">
+    <div class="game-container">
+        <canvas id="game1Canvas"></canvas>
+        <div class="game-info">
+            <div>❤️: <span id="heartsCount">0</span>/10</div>
+            <div>💀: <span id="livesCount">5</span></div>
+            <div>Скорость: <span id="speedCount">3</span></div>
+        </div>
+    </div>
+    <div class="game-controls">
+        <div class="instructions">ПРОБЕЛ - прыжок | Двойной прыжок - ПРОБЕЛ в воздухе</div>
+        <button onclick="endGame1()">Выйти</button>
+    </div>
+</div>
+
+<div id="miniGame2" class="mini-game">
+    <div class="game-container">
+        <canvas id="game2Canvas"></canvas>
+        <div class="game-info">
+            <div>⭐: <span id="starsCount">0</span>/10</div>
+            <div>💀: <span id="lives2Count">3</span></div>
+            <div>Время: <span id="timeCount">60</span>с</div>
+        </div>
+    </div>
+    <div class="game-controls">
+        <div class="instructions">WASD - движение | Собери 10 звезд за 60 секунд!</div>
+        <button onclick="endGame2()">Выйти</button>
+    </div>
+</div>
+
+<div id="miniGame3" class="mini-game">
+    <div class="game-container">
+        <canvas id="game3Canvas"></canvas>
+        <div class="game-info">
+            <div>❤️ Игрок: <span id="playerHealth">150</span></div>
+            <div>💀 Враг: <span id="enemyHealth">200</span></div>
+            <div>Патроны: <span id="ammoCount">30</span></div>
+        </div>
+    </div>
+    <div class="game-controls">
+        <div class="instructions">ПРОБЕЛ - стрельба | WASD - движение | R - перезарядка | E - щит</div>
+        <button onclick="endGame3()">Выйти</button>
+    </div>
+</div>
+
+<!-- Финальная сцена с поцелуем -->
+<div id="finalKissScene">
+    <div class="kiss-container">
+        <img class="kiss-background" src="images/kiss_bg.jpg" alt="Фон поцелуя">
+        <img id="kissImg" class="kiss-image" src="images/characters/kiss.png" alt="Поцелуй">
+        <div id="kissText" style="position: absolute; bottom: 80px; z-index: 4; color: white; font-size: 28px; text-shadow: 2px 2px 4px #000;"></div>
+    </div>
+    <div class="game-controls">
+        <button onclick="showWakeUpScene()">Продолжить...</button>
+    </div>
+</div>
+
+<!-- Сцена пробуждения -->
+<div id="wakeUpScene">
+    <img class="wakeup-background" src="images/wakeup_bg.jpg" alt="Фон пробуждения">
+    <div class="wakeup-text" id="wakeupText"></div>
+    <div class="game-controls">
+        <button onclick="restartGame()">Начать заново</button>
+    </div>
+</div>
+
+<!-- Аудио и кнопка управления -->
+<audio id="bgMusic" loop></audio>
+<button id="musicBtn" style="display:none;">🔊 Вкл/Выкл музыку</button>
+
+<script>
+// ===============================
+// ЭЛЕМЕНТЫ DOM
+// ===============================
+const scene = document.getElementById("scene");
+const textDiv = document.getElementById("text");
+const choicesDiv = document.getElementById("choices");
+const hub = document.getElementById("hub");
+const portalsDiv = document.getElementById("portals");
+const music = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+const memoryPhoto = document.getElementById("memoryPhoto");
+const backgroundImg = document.getElementById("backgroundImg");
+const hubBackground = document.getElementById("hubBackground");
+const loadingScreen = document.getElementById("loadingScreen");
+const loadingText = document.getElementById("loadingText");
+const finalKissScene = document.getElementById("finalKissScene");
+const kissImg = document.getElementById("kissImg");
+const kissText = document.getElementById("kissText");
+const wakeUpScene = document.getElementById("wakeUpScene");
+const wakeupText = document.getElementById("wakeupText");
+
+// ===============================
+// НАСТРОЙКИ ФОНОВЫХ ИЗОБРАЖЕНИЙ
+// ===============================
+const imageSettings = {
+    start: { url: "images/backgrounds/start_bg.jpg", overlay: true },
+    dream: { url: "images/backgrounds/dream_bg.jpg", overlay: true },
+    rain: { url: "images/backgrounds/rain_bg.jpg", overlay: true },
+    kiss: { url: "images/backgrounds/kiss_bg.jpg", overlay: true },
+    hub: { url: "images/backgrounds/hub_bg.jpg", overlay: false },
+    wakeup: { url: "images/backgrounds/wakeup_bg.jpg", overlay: true }
+};
+
+// ===============================
+// НАСТРОЙКИ МУЗЫКИ
+// ===============================
+const musicFiles = {
+    main: "audio/music.mp3",
+    fight: "audio/fight.mp3",
+};
+
+// ===============================
+// ИЗОБРАЖЕНИЯ ПЕРСОНАЖЕЙ
+// ===============================
+const characterImages = {
+    player1: "images/characters/player1.png",
+    player1Jump: "images/characters/player1_jump.png",
+    player2: "images/characters/player2.png",
+    enemy2: "images/characters/enemy2.png",
+    player3: "images/characters/player3.png",
+    enemy3: "images/characters/enemy3.png",
+    kiss: "images/characters/kiss.png",
+    heart: "images/items/heart.png",
+    star: "images/items/star.png",
+    bullet: "images/items/bullet.png",
+    enemyBullet: "images/items/enemy_bullet.png"
+};
+
+
+// ===============================
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+// ===============================
+let gameStarted = false;
+let currentMemoryIndex = 0;
+
+// ===============================
+// ИНИЦИАЛИЗАЦИЯ
+// ===============================
+function init() {
+    music.volume = 0.4;
+    musicBtn.onclick = () => {
+        if (music.paused) {
+            music.play().catch(e => console.log("Не удалось воспроизвести музыку"));
+        } else {
+            music.pause();
+        }
+    };
+    
+    preloadCharacterImages();
+}
+
+// ===============================
+// ПРЕДЗАГРУЗКА ИЗОБРАЖЕНИЙ
+// ===============================
+function preloadCharacterImages() {
+    const imagesToLoad = [
+        ...Object.values(characterImages),
+        ...Object.values(imageSettings).map(img => img.url)
+    ];
+    
+    const totalImages = imagesToLoad.length;
+    let loaded = 0;
+    
+    imagesToLoad.forEach(src => {
+        const img = new Image();
+        img.onload = () => {
+            loaded++;
+            loadingText.textContent = `Загрузка... ${Math.round((loaded/totalImages)*100)}%`;
+            
+            if (loaded === totalImages) {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        scene.style.display = 'flex';
+                        musicBtn.style.display = 'block';
+                        showStartScreen();
+                    }, 500);
+                }, 500);
+            }
+        };
+        img.onerror = () => {
+            console.warn(`Не удалось загрузить изображение: ${src}`);
+            loaded++;
+            
+            if (loaded === totalImages) {
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        scene.style.display = 'flex';
+                        musicBtn.style.display = 'block';
+                        showStartScreen();
+                    }, 500);
+                }, 500);
+            }
+        };
+        img.src = src;
+    });
+}
+// ===============================
+// УПРАВЛЕНИЕ МУЗЫКОЙ
+// ===============================
+function playMusic(track) {
+    if (music.src.includes(track) && !music.paused) {
+        return; // Музыка уже играет
+    }
+    
+    music.pause();
+    music.src = track;
+    music.currentTime = 0;
+    
+    const playPromise = music.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("Автовоспроизведение заблокировано. Музыка включится при первом действии.");
+            
+            // Включаем музыку при первом взаимодействии
+            const enableMusic = () => {
+                music.play().catch(e => console.log("Не удалось включить музыку"));
+                document.removeEventListener('click', enableMusic);
+                document.removeEventListener('keydown', enableMusic);
+                scene.removeEventListener('click', enableMusic);
+            };
+            
+            document.addEventListener('click', enableMusic);
+            document.addEventListener('keydown', enableMusic);
+            scene.addEventListener('click', enableMusic);
+        });
+    }
+}
+
+// ===============================
+// ФОН
+// ===============================
+function setBackground(imgKey) {
+    const settings = imageSettings[imgKey];
+    if (!settings) return;
+    
+    backgroundImg.src = settings.url;
+    backgroundImg.style.display = 'block';
+    
+    const overlay = document.querySelector('.gif-overlay');
+    if (overlay) {
+        overlay.style.display = settings.overlay ? 'block' : 'none';
+    }
+}
+
+// ===============================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ===============================
+function typeTextHTML(element, html, speed = 30, callback = null) {
+    element.innerHTML = "";
+    let tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    let nodes = Array.from(tempDiv.childNodes);
+    
+    let iNode = 0;
+    
+    function printNode() {
+        if (iNode >= nodes.length) {
+            if (callback) callback();
+            return;
+        }
+        
+        let node = nodes[iNode];
+        iNode++;
+        
+        if (node.nodeType === 3) {
+            let textContent = node.textContent;
+            let j = 0;
+            
+            function printChar() {
+                if (j < textContent.length) {
+                    element.innerHTML += textContent[j];
+                    j++;
+                    setTimeout(printChar, speed);
+                } else {
+                    printNode();
+                }
+            }
+            printChar();
+        } else {
+            let el = document.createElement(node.nodeName);
+            element.appendChild(el);
+            typeTextHTML(el, node.innerHTML, speed, printNode);
+        }
+    }
+    printNode();
+}
+
+function nextButton(text, callback) {
+    choicesDiv.innerHTML = "";
+    const btn = document.createElement("button");
+    btn.innerText = text;
+    btn.onclick = callback;
+    choicesDiv.appendChild(btn);
+}
+
+// ===============================
+// НАЧАЛЬНЫЙ ЭКРАН
+// ===============================
+function showStartScreen() {
+    setBackground("start");
+    typeTextHTML(textDiv, "<p class='pulse-text'>А может это все сон?</p><p>Нажмите, чтобы начать...</p>", 40, () => {
+        nextButton("НАЧАТЬ", startGameWithMusic);
+        
+        scene.style.cursor = "pointer";
+        const startOnClick = (e) => {
+            if (e.target.tagName !== 'BUTTON' && e.target.id !== 'musicBtn') {
+                startGameWithMusic();
+                scene.removeEventListener('click', startOnClick);
+                scene.style.cursor = "default";
+            }
+        };
+        scene.addEventListener('click', startOnClick);
+    });
+}
+
+function startGameWithMusic() {
+    if (gameStarted) return;
+    gameStarted = true;
+    
+    music.src = musicFiles.main;
+    music.play().catch(e => {
+        console.log("Музыка будет включена после взаимодействия");
+    });
+    
+    startPrologue();
+}
+
+// ===============================
+// ПРОЛОГ С ГАЛЕРЕЕЙ 6 ФОТО
+// ===============================
+function startPrologue() {
+    setBackground("start");
+    typeTextHTML(textDiv, "<p>Я засыпал, обнимая Айдай…</p><p>Всё было спокойно.</p>", 30, () => {
+        nextButton("УСНУТЬ", prologueStep1);
+    });
+}
+
+function prologueStep1() {
+    setBackground("dream");
+    typeTextHTML(textDiv, 
+        "<p>Что? Почему Она начинает растворяться…</p>" +
+        "<p class='pulse-text'>Голос из темноты:</p>" +
+        "<p>«Любовь живёт в памяти. Забери воспоминания — и человека не станет.»</p>", 
+        30, 
+        () => {
+            nextButton("ПРОСНУТЬСЯ", prologueStep2);
+        }
+    );
+}
+
+function prologueStep2() {
+    setBackground("rain");
+    
+    // Создаем галерею фото с улучшенной видимостью
+    const gallery = document.createElement('div');
+    gallery.id = 'memoryGallery';
+    gallery.className = 'memory-gallery';
+    gallery.style.display = 'none';
+    
+    // Массив реальных фото - МОЖНО ИСПОЛЬЗОВАТЬ ЛЮБЫЕ ИЗОБРАЖЕНИЯ
+    const memoryPhotos = [
+        "images/memories/real1.jpg",
+        "images/memories/real2.jpg", 
+        "images/memories/real3.jpg",
+        "images/memories/real4.jpg",
+        "images/memories/real5.jpg",
+        "images/memories/real6.jpg"
+    ];
+    
+    // Альтернативные URL для тестирования (можно использовать любые картинки из интернета)
+    const fallbackPhotos = [
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=200&fit=crop"
+    ];
+    
+    // Создаем миниатюры
+    for (let i = 0; i < 6; i++) {
+        const photoContainer = document.createElement('div');
+        photoContainer.className = 'memory-photo';
+        
+        const img = document.createElement('img');
+        img.src = memoryPhotos[i];
+        img.alt = `Воспоминание ${i + 1}`;
+        img.loading = 'lazy';
+        
+        // Если фото не загрузится - используем fallback
+        img.onerror = () => {
+            console.log(`Не удалось загрузить фото ${i + 1}, используем fallback`);
+            img.src = fallbackPhotos[i];
+            
+            // Если и fallback не загрузится, создаем цветную заглушку
+            img.onerror = () => {
+                createColorPlaceholder(img, i);
+            };
+        };
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'photo-overlay';
+        overlay.innerHTML = `
+            <div>
+                <div style="font-size: 16px; margin-bottom: 5px;">ВОСПОМИНАНИЕ ${i + 1}</div>
+                <div style="font-size: 12px; color: #ff9a9e;">(кликни, чтобы вспомнить)</div>
+            </div>
+        `;
+        
+        photoContainer.appendChild(img);
+        photoContainer.appendChild(overlay);
+        gallery.appendChild(photoContainer);
+        
+        // При клике пытаемся "вспомнить" - делаем фото более четким
+        photoContainer.onclick = () => {
+            // Временно делаем фото почти четким
+            img.style.filter = 'blur(1px) grayscale(20%) brightness(1.1)';
+            overlay.innerHTML = `
+                <div class="pulse-text" style="color: #00ffaa; font-size: 16px;">
+                     ВСПОМИНАЮ... 
+                </div>
+            `;
+            overlay.style.background = 'rgba(0, 150, 255, 0.6)';
+            
+            // Эффект вспышки
+            photoContainer.classList.add('memory-flash');
+            
+            // Звуковой эффект (опционально)
+            try {
+                const clickSound = new Audio('audio/click.mp3');
+                clickSound.volume = 0.3;
+                clickSound.play().catch(e => console.log("Не удалось воспроизвести звук"));
+            } catch (e) {
+                console.log("Звук не доступен");
+            }
+            
+            // Через 3 секунды возвращаем размытие
+            setTimeout(() => {
+                img.style.filter = 'blur(5px) grayscale(80%) brightness(0.8)';
+                overlay.innerHTML = `
+                    <div style="color: #ffd700;">
+                        <div style="font-size: 14px;">ПОЧТИ...</div>
+                        <div style="font-size: 11px;">нужно найти все воспоминания</div>
+                    </div>
+                `;
+                overlay.style.background = 'rgba(255, 200, 0, 0.5)';
+                photoContainer.classList.remove('memory-flash');
+                
+                // Через 2 секунды возвращаем исходное состояние
+                setTimeout(() => {
+                    overlay.innerHTML = `
+                        <div>
+                            <div style="font-size: 16px; margin-bottom: 5px;">ВОСПОМИНАНИЕ ${i + 1}</div>
+                            <div style="font-size: 12px; color: #ff9a9e;">(кликни, чтобы вспомнить)</div>
+                        </div>
+                    `;
+                    overlay.style.background = 'rgba(0, 0, 0, 0.7)';
+                }, 2000);
+            }, 3000);
+        };
+    }
+    
+    scene.appendChild(gallery);
+    
+    typeTextHTML(textDiv, 
+        "<p class='pulse-text'>Я проснулся</p>" +
+        "<p>Её рядом нет.</p>" +
+        "<p>На моём столе разбросаны старые фото...</p>" +
+        "<p style='color: #ff9a9e;'>Я вижу нас вместе, но лица размыты.</p>" +
+        "<p>Кто она? Почему я не могу вспомнить?</p>", 
+        40, 
+        () => {
+            // Кнопка для показа галереи
+            const viewBtn = document.createElement("button");
+            viewBtn.innerText = "Я НЕ МОГУ ВСПОМНИТЬ...";
+            viewBtn.className = "pulse-text";
+            viewBtn.style.cssText = `
+                background: linear-gradient(145deg, #6a11cb, #2575fc);
+                font-size: 18px;
+                padding: 20px 40px;
+                margin: 20px;
+            `;
+            viewBtn.onclick = function() {
+                // Показываем галерею
+                gallery.style.display = 'grid';
+                textDiv.style.display = 'none';
+                choicesDiv.innerHTML = '';
+                
+                // Инструкция
+                const instruction = document.createElement('div');
+                instruction.innerHTML = `
+                    <div style="
+                        position: absolute;
+                        top: 50px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        color: white;
+                        text-align: center;
+                        background: rgba(0, 0, 0, 0.7);
+                        padding: 15px;
+                        border-radius: 10px;
+                        border: 2px solid #ff5f7d;
+                        z-index: 11;
+                        max-width: 80%;
+                    ">
+                        <p style="margin: 0 0 10px 0; font-size: 18px; color: #ff9a9e;">
+                            💭 РАЗМЫТЫЕ ВОСПОМИНАНИЯ
+                        </p>
+                        <p style="margin: 0; font-size: 14px;">
+                            Кликай на фото, чтобы попытаться вспомнить...
+                        </p>
+                    </div>
+                `;
+                scene.appendChild(instruction);
+                
+                // Создаем кнопку "ПРОДОЛЖИТЬ"
+                const continueBtn = document.createElement('button');
+                continueBtn.textContent = 'ПРОДОЛЖИТЬ...';
+                continueBtn.style.cssText = `
+                    position: absolute;
+                    bottom: 50px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 11;
+                    padding: 15px 35px;
+                    font-size: 18px;
+                    background: linear-gradient(145deg, #ff5f7d, #ff9a9e);
+                    border: 3px solid white;
+                `;
+                continueBtn.onclick = function() {
+                    // Убираем галерею и кнопку
+                    gallery.remove();
+                    continueBtn.remove();
+                    instruction.remove();
+                    
+                    // Показываем текст и переходим к следующему шагу
+                    textDiv.style.display = 'block';
+                    prologueStep3();
+                };
+                
+                scene.appendChild(continueBtn);
+                
+                // Автопереход через 25 секунд
+                setTimeout(() => {
+                    if (continueBtn.parentNode) {
+                        continueBtn.click();
+                    }
+                }, 25000);
+            };
+            
+            choicesDiv.innerHTML = '';
+            choicesDiv.appendChild(viewBtn);
+        }
+    );
+}
+
+// Функция для создания цветных заглушек
+function createColorPlaceholder(imgElement, index) {
+    const colors = [
+        ['#2a1a3a', '#ff5f7d'], // фиолетовый/розовый
+        ['#1a2a3a', '#00b4d8'], // синий/голубой
+        ['#1a3a2a', '#4cc9f0'], // зеленый/бирюзовый
+        ['#3a2a1a', '#f72585'], // коричневый/пурпурный
+        ['#2a3a1a', '#7209b7'], // оливковый/фиолетовый
+        ['#3a1a2a', '#3a0ca3']  // бордовый/синий
+    ];
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    
+    // Градиентный фон
+    const gradient = ctx.createLinearGradient(0, 0, 300, 200);
+    gradient.addColorStop(0, colors[index][0]);
+    gradient.addColorStop(1, colors[index][1]);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 300, 200);
+    
+    // Центральный размытый круг
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.arc(150, 100, 60, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Текст
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`ВОСПОМИНАНИЕ`, 150, 80);
+    ctx.fillText(`${index + 1}`, 150, 110);
+    
+    // Подпись
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.font = '14px Arial';
+    ctx.fillText('(лицо размыто)', 150, 140);
+    
+    imgElement.src = canvas.toDataURL();
+    imgElement.style.filter = 'blur(5px) grayscale(30%) brightness(0.9)';
+}
+
+function prologueStep3() {
+    // Убираем галерею если она есть
+    const gallery = document.getElementById('memoryGallery');
+    if (gallery) {
+        gallery.remove();
+    }
+    
+    // Убираем кнопку "ПРОДОЛЖИТЬ" если она есть
+    const continueBtn = scene.querySelector('button[onclick*="prologueStep3"]');
+    if (continueBtn) {
+        continueBtn.remove();
+    }
+    
+    // Показываем текст и кнопки
+    textDiv.style.display = 'block';
+    textDiv.innerHTML = '';
+    choicesDiv.innerHTML = '';
+    
+    setBackground("kiss");
+    memoryPhoto.style.display = "none";
+    
+    typeTextHTML(textDiv, 
+        "<p>У меня кто-то был…</p>" +
+        "<p>Кто-то ценный мне. Я хочу вспомнить, я хочу вернуть.</p>", 
+        30, 
+        () => {
+            nextButton("ЗАКРЫТЬ ГЛАЗА", showHub);
+        }
+    );
+}
+
+// ===============================
+// ВОСПОМИНАНИЯ
+// ===============================
+const memories = [
+    {
+        title: "ПОД ДУБОМ",
+        text: "Прохладно, шел дождик, мы сидели под дубом и долго долго болтали...",
+        collected: false,
+        bg: "rain",
+        game: startMiniGame1
+    },
+    {
+        title: "ПЕРВЫЙ ПОЦЕЛУЙ",
+        text: "После бара мы с ней поцеловались. Вкус алкоголя на её губах, сердцебиение, ускоряющееся с каждой секундой...",
+        collected: false,
+        bg: "kiss",
+        game: startMiniGame2
+    },
+    {
+        title: "ТОТ САМЫЙ ДЕНЬ",
+        text: "Как мы начали встречаться... мы были в кафе, а затем я купил ей мишку...",
+        collected: false,
+        bg: "dream",
+        game: startMiniGame3
+    }
+];
+
+// ===============================
+// ХАБ С ПОРТАЛАМИ
+// ===============================
+function showHub() {
+    scene.style.display = "none";
+    hub.style.display = "flex";
+    hubBackground.src = imageSettings.hub.url;
+    portalsDiv.innerHTML = "";
+    
+    memories.forEach((mem, idx) => {
+        const btn = document.createElement("button");
+        btn.innerText = mem.title;
+        btn.classList.add("portal");
+        
+        // Портал доступен если:
+        const isAvailable = idx === 0 || mem.collected || 
+                           (idx > 0 && memories[idx-1].collected);
+        
+        if (isAvailable) {
+            btn.classList.add("visible");
+        }
+        
+        if (mem.collected) {
+            btn.style.opacity = "0.7";
+            btn.style.background = "linear-gradient(145deg, #4CAF50, #45a049)";
+            btn.innerHTML = `✅ ${mem.title}`;
+        } else {
+            btn.style.background = "linear-gradient(145deg, #ff5f7d, #ff9a9e)";
+        }
+        
+        btn.onclick = () => openMemory(idx);
+        portalsDiv.appendChild(btn);
+    });
+    
+    // Проверяем, все ли воспоминания собраны
+    const allCollected = memories.every(m => m.collected);
+    if (allCollected) {
+        // Добавляем кнопку для финальной сцены
+        const finalBtn = document.createElement("button");
+        finalBtn.innerHTML = "💖 ВЕРНУТЬ ЕЁ 💖";
+        finalBtn.style.background = "linear-gradient(145deg, #ffd700, #ff6b6b)";
+        finalBtn.style.fontSize = "24px";
+        finalBtn.style.padding = "20px 40px";
+        finalBtn.classList.add("visible", "pulse-text");
+        finalBtn.onclick = showFinalKissScene;
+        portalsDiv.appendChild(finalBtn);
+    }
+}
+
+function openMemory(idx) {
+    const mem = memories[idx];
+    
+    // Проверяем доступность портала
+    if (idx > 0 && !memories[idx-1].collected && !mem.collected) {
+        // Показываем сообщение о необходимости пройти предыдущий уровень
+        hub.style.display = "none";
+        scene.style.display = "flex";
+        setBackground("dream");
+        typeTextHTML(textDiv, 
+            `<p>Это воспоминание ещё заблокировано...</p>
+            <p>Сначала собери предыдущее воспоминание:</p>
+            <p class="pulse-text">${memories[idx-1].title}</p>`, 
+            30, 
+            () => {
+                nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+            }
+        );
+        return;
+    }
+    
+    currentMemoryIndex = idx;
+    
+    hub.style.display = "none";
+    scene.style.display = "flex";
+    setBackground(mem.bg);
+    memoryPhoto.style.display = "none";
+    
+    if (mem.collected) {
+        // Показываем уже собранное воспоминание
+        typeTextHTML(textDiv, 
+            `<p class="pulse-text">✅ ЭТО ВОСПОМИНАНИЕ УЖЕ СОБРАНО</p>
+            <p>${mem.text}</p>`, 
+            30, 
+            () => {
+                nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+            }
+        );
+    } else {
+        // Начинаем новую игру
+        typeTextHTML(textDiv, mem.text, 30, () => {
+            nextButton("ПОГРУЗИТЬСЯ В ВОСПОМИНАНИЕ", () => {
+                mem.game();
+            });
+        });
+    }
+}
+
+// ===============================
+// МИНИ-ИГРА 1: БЕГУН СО СЕРДЕЧКАМИ
+// ===============================
+function startMiniGame1() {
+    console.log("Запуск мини-игры 1...");
+    
+    scene.style.display = "none";
+    document.getElementById("miniGame1").style.display = "flex";
+    
+    const canvas = document.getElementById("game1Canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 800;
+    canvas.height = 500;
+    
+    // Сброс счетчиков
+    document.getElementById("heartsCount").textContent = "0";
+    document.getElementById("livesCount").textContent = "5";
+    document.getElementById("speedCount").textContent = "3";
+    
+    let score = 0;
+    let lives = 5;
+    let gameOver = false;
+    let frame = 0;
+    let gameSpeed = 3;
+    
+    // ЗАГРУЗКА ИЗОБРАЖЕНИЙ
+    const playerImg = new Image();
+    playerImg.src = characterImages.player1;
+    
+    const playerJumpImg = new Image();
+    playerJumpImg.src = characterImages.player1Jump;
+    
+    const heartImg = new Image();
+    heartImg.src = characterImages.heart;
+    
+    const enemyImg = new Image();
+    enemyImg.src = characterImages.enemy2;
+    
+    // Простые массивы объектов
+    const hearts = [];
+    const enemies = [];
+    
+    // Игрок
+    const player = {
+        x: 100,
+        y: 350,
+        width: 80,
+        height: 120,
+        dy: 0,
+        jumpForce: 15,
+        gravity: 1.0,
+        groundY: 350,
+        jumpCount: 0,
+        isJumping: false
+    };
+    
+    // Инициализация объектов
+    function initObjects() {
+        // Создаем 2 сердечка
+        for (let i = 0; i < 2; i++) {
+            hearts.push({
+                x: 300 + Math.random() * 300,
+                y: 150 + Math.random() * 150,
+                size: 50,
+                collected: false,
+                pulse: Math.random() * Math.PI * 2,
+                speed: 2,
+                rotation: 0
+            });
+        }
+        
+        // Создаем 1 злодея
+        for (let i = 0; i < 1; i++) {
+            enemies.push({
+                x: 500 + Math.random() * 200,
+                y: 350,
+                width: 60,
+                height: 60,
+                speed: 3,
+                type: 0
+            });
+        }
+    }
+    
+    initObjects();
+    
+    // Спавн новых сердечек
+    function spawnHeart() {
+        if (hearts.length < 3) {
+            hearts.push({
+                x: 850,
+                y: 150 + Math.random() * 150,
+                size: 50,
+                collected: false,
+                pulse: Math.random() * Math.PI * 2,
+                speed: 2,
+                rotation: 0
+            });
+        }
+    }
+    
+    // Спавн новых злодеев
+    function spawnEnemy() {
+        if (enemies.length < 2) {
+            enemies.push({
+                x: 850,
+                y: 350,
+                width: 60,
+                height: 60,
+                speed: 3 + Math.random(),
+                type: Math.floor(Math.random() * 2)
+            });
+        }
+    }
+    
+    // Основной цикл игры
+    function update() {
+        if (gameOver) return;
+        
+        // Гравитация и прыжки
+        player.dy += player.gravity;
+        player.y += player.dy;
+        
+        // Проверка земли
+        if (player.y > player.groundY) {
+            player.y = player.groundY;
+            player.dy = 0;
+            player.jumpCount = 0;
+            player.isJumping = false;
+        } else {
+            player.isJumping = true;
+        }
+        
+        // Обновление сердечек
+        for (let i = hearts.length - 1; i >= 0; i--) {
+            const heart = hearts[i];
+            
+            if (heart.collected) {
+                hearts.splice(i, 1);
+                continue;
+            }
+            
+            heart.x -= gameSpeed + heart.speed;
+            heart.pulse += 0.1;
+            heart.rotation += 0.05;
+            
+            if (heart.x < -50) {
+                hearts.splice(i, 1);
+                continue;
+            }
+            
+            // Проверка сбора сердечка
+            if (heart.x < player.x + player.width &&
+                heart.x + heart.size > player.x &&
+                heart.y < player.y + player.height &&
+                heart.y + heart.size > player.y) {
+                
+                heart.collected = true;
+                score++;
+                document.getElementById("heartsCount").textContent = score;
+                
+                // Эффект сбора
+                createCollectEffect(heart.x + heart.size/2, heart.y + heart.size/2);
+                
+                // Проверка победы (нужно собрать 7 сердечек)
+                if (score >= 7) {
+                    winGame1();
+                    return;
+                }
+            }
+        }
+        
+        // Обновление злодеев
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const enemy = enemies[i];
+            
+            enemy.x -= enemy.speed;
+            
+            if (enemy.x < -100) {
+                enemies.splice(i, 1);
+                continue;
+            }
+            
+            // Проверка столкновения со злодеем
+            if (enemy.x < player.x + player.width &&
+                enemy.x + enemy.width > player.x &&
+                enemy.y < player.y + player.height &&
+                enemy.y + enemy.height > player.y) {
+                
+                lives--;
+                document.getElementById("livesCount").textContent = lives;
+                
+                // Эффект удара
+                createHitEffect();
+                
+                // Отбрасывание игрока
+                player.dy = -10;
+                player.y -= 40;
+                
+                // Удаляем злодея
+                enemies.splice(i, 1);
+                
+                // Проверка поражения
+                if (lives <= 0) {
+                    loseGame1();
+                    return;
+                }
+            }
+        }
+        
+        // Спавн новых объектов
+        if (frame % 90 === 0) spawnHeart();
+        if (frame % 180 === 0) spawnEnemy();
+        
+        // Медленное увеличение скорости
+        if (frame % 600 === 0 && gameSpeed < 6) {
+            gameSpeed += 0.3;
+            document.getElementById("speedCount").textContent = gameSpeed.toFixed(1);
+        }
+        
+        // Отрисовка
+        draw();
+        
+        frame++;
+        requestAnimationFrame(update);
+    }
+    
+    function draw() {
+        // Очистка
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Фон с градиентом
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, "#0a0a2a");
+        gradient.addColorStop(0.5, "#1a1a3a");
+        gradient.addColorStop(1, "#2a2a5a");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Земля
+        ctx.fillStyle = "#3a2a4a";
+        ctx.fillRect(0, 420, canvas.width, canvas.height - 420);
+        
+        // Трава
+        ctx.fillStyle = "#4a3a5a";
+        for (let i = 0; i < canvas.width; i += 20) {
+            ctx.fillRect(i, 420, 10, 5);
+        }
+        
+        // ИГРОК - используем изображение
+        const currentPlayerImg = player.isJumping ? playerJumpImg : playerImg;
+        ctx.drawImage(currentPlayerImg, player.x, player.y, player.width, player.height);
+        
+        // СЕРДЕЧКИ
+        hearts.forEach(heart => {
+            if (!heart.collected) {
+                const pulseSize = heart.size + Math.sin(heart.pulse) * 8;
+                
+                // Рисуем сердечко с вращением
+                ctx.save();
+                ctx.translate(heart.x + heart.size/2, heart.y + heart.size/2);
+                ctx.rotate(heart.rotation);
+                ctx.drawImage(heartImg, -pulseSize/2, -pulseSize/2, pulseSize, pulseSize);
+                ctx.restore();
+            }
+        });
+        
+        // ЗЛОДЕИ
+        enemies.forEach(enemy => {
+            if (enemyImg.complete && enemyImg.naturalWidth > 0) {
+                ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+            } else {
+                // Если изображение не загрузилось, рисуем простого злодея
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.arc(
+                    enemy.x + enemy.width/2,
+                    enemy.y + enemy.height/2,
+                    enemy.width/2,
+                    0, Math.PI * 2
+                );
+                ctx.fill();
+                
+                // Злые глаза
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(enemy.x + 15, enemy.y + 15, 8, 10);
+                ctx.fillRect(enemy.x + enemy.width - 23, enemy.y + 15, 8, 10);
+                
+                // Злой рот
+                ctx.fillRect(enemy.x + 20, enemy.y + enemy.height - 20, enemy.width - 40, 5);
+            }
+        });
+        
+        // Интерфейс
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px "Press Start 2P"';
+        ctx.fillText('Собери 7 сердечек!', 20, 30);
+        
+        // Счетчики
+        ctx.fillText(`❤️: ${score}/10`, 20, 60);
+        ctx.fillText(`💀: ${lives}`, 200, 60);
+        ctx.fillText(`⚡: ${gameSpeed.toFixed(1)}`, 350, 60);
+        
+        // Полоска прогресса
+        ctx.fillStyle = '#4a4a6a';
+        ctx.fillRect(20, 70, 200, 10);
+        ctx.fillStyle = '#ff5f7d';
+        ctx.fillRect(20, 70, (score / 7) * 200, 10);
+        
+        // Подсказка управления
+        ctx.fillStyle = '#ff9a9e';
+        ctx.font = '12px "Press Start 2P"';
+        ctx.fillText('ПРОБЕЛ - прыжок (можно дважды!)', 20, 480);
+    }
+    
+    // Эффект сбора сердечка
+    function createCollectEffect(x, y) {
+        for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+                const angle = (i / 4) * Math.PI * 2;
+                const distance = 20;
+                const px = x + Math.cos(angle) * distance;
+                const py = y + Math.sin(angle) * distance;
+                
+                ctx.fillStyle = i % 2 === 0 ? '#ff5f7d' : '#ff9a9e';
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }, i * 50);
+        }
+    }
+    
+    // Эффект удара
+    function createHitEffect() {
+        // Красная вспышка
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Быстрое восстановление
+        setTimeout(() => {
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }, 50);
+    }
+    
+    // Победа
+    function winGame1() {
+        gameOver = true;
+        
+        ctx.fillStyle = 'rgba(0, 255, 100, 0.3)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#4CAF50';
+        ctx.font = '40px "Press Start 2P"';
+        ctx.fillText('ПОБЕДА!', 300, 200);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillText('Воспоминание собрано!', 200, 250);
+        
+        setTimeout(() => {
+            // Отмечаем как собранное
+            memories[currentMemoryIndex].collected = true;
+            
+            // Возвращаемся в сцену
+            document.getElementById("miniGame1").style.display = "none";
+            scene.style.display = "flex";
+            
+            // Показываем воспоминание
+            setBackground(memories[currentMemoryIndex].bg);
+            memoryPhoto.src = "images/memory1.jpg";
+            memoryPhoto.style.display = "block";
+            
+            typeTextHTML(textDiv, 
+                '<p class="pulse-text">✅ ВОСПОМИНАНИЕ СОБРАНО!</p>' +
+                '<p>Ты вспомнил тот дождь под дубом...</p>' +
+                '<p>Её смех смешивался со звуком капель,</p>' +
+                '<p>а её глаза сияли как звёзды в дождливую ночь.</p>', 
+                30, 
+                () => {
+                    nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+                }
+            );
+        }, 1500);
+    }
+    
+    // Поражение
+    function loseGame1() {
+        gameOver = true;
+        
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#ff5f7d';
+        ctx.font = '40px "Press Start 2P"';
+        ctx.fillText('ПОРАЖЕНИЕ', 280, 200);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillText('Попробуй еще раз!', 250, 250);
+        
+        setTimeout(() => {
+            document.getElementById("miniGame1").style.display = "none";
+            scene.style.display = "flex";
+            
+            typeTextHTML(textDiv, 
+                '<p>Не удалось собрать воспоминание...</p>' +
+                '<p>Злодеи оказались сильнее.</p>' +
+                '<p>Попробуй снова!</p>', 
+                30, 
+                () => {
+                    nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+                }
+            );
+        }, 1500);
+    }
+    
+    // Управление
+    function handleKeyDown(e) {
+        if (e.code === 'Space' && player.jumpCount < 2 && !gameOver) {
+            player.dy = -player.jumpForce;
+            player.jumpCount++;
+            player.isJumping = true;
+        }
+    }
+    
+    window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Запуск игры
+    console.log("Игра запущена!");
+    update();
+}
+
+function endGame1() {
+    document.getElementById("miniGame1").style.display = "none";
+    scene.style.display = "flex";
+    showHub();
+}
+
+// ===============================
+// МИНИ-ИГРА 2: ЛАБИРИНТ СО ЗВЕЗДАМИ
+// ===============================
+function startMiniGame2() {
+    scene.style.display = "none";
+    document.getElementById("miniGame2").style.display = "flex";
+    
+    const canvas = document.getElementById("game2Canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    const maze = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,1,0,1,0,1,1,1,1,1,1,0,1,0,1],
+        [1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,1],
+        [1,0,1,1,1,1,1,0,1,1,0,1,0,1,0,1],
+        [1,0,0,0,0,0,1,0,1,0,0,1,0,1,0,1],
+        [1,1,1,1,1,0,1,0,1,0,1,1,0,0,0,1],
+        [1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1],
+        [1,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+    
+    const cellSize = 50;
+    let player = {x: 1, y: 1};
+    let stars = [];
+    let collectedStars = 0;
+    let lives = 3;
+    let timeLeft = 60;
+    let gameOver = false;
+    
+    // Создаем звезды
+    const starPositions = [
+        [3,2], [7,1], [12,1], [14,3],
+        [2,5], [10,4], [13,6], [5,8],
+        [8,9], [14,9]
+    ];
+    
+    starPositions.forEach(pos => {
+        stars.push({
+            x: pos[0],
+            y: pos[1],
+            collected: false,
+            pulse: Math.random() * Math.PI * 2
+        });
+    });
+    
+    // Управление
+    const keys = {};
+    document.addEventListener("keydown", (e) => {
+        keys[e.key.toLowerCase()] = true;
+    });
+    document.addEventListener("keyup", (e) => {
+        keys[e.key.toLowerCase()] = false;
+    });
+    
+    // Таймер
+    const timer = setInterval(() => {
+        if (!gameOver) {
+            timeLeft--;
+            document.getElementById("timeCount").textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                loseGame2();
+                clearInterval(timer);
+            }
+        }
+    }, 1000);
+    
+    function updateGame2() {
+        if (gameOver) return;
+        
+        // Движение
+        let newX = player.x;
+        let newY = player.y;
+        
+        if (keys['w'] || keys['ц']) newY--;
+        if (keys['s'] || keys['ы']) newY++;
+        if (keys['a'] || keys['ф']) newX--;
+        if (keys['d'] || keys['в']) newX++;
+        
+        // Проверка стен
+        if (maze[newY] && maze[newY][newX] === 0) {
+            player.x = newX;
+            player.y = newY;
+        }
+        
+        // Сбор звезд
+        stars.forEach(star => {
+            if (!star.collected && 
+                Math.abs(player.x - star.x) < 0.5 && 
+                Math.abs(player.y - star.y) < 0.5) {
+                star.collected = true;
+                collectedStars++;
+                document.getElementById("starsCount").textContent = collectedStars;
+                
+                if (collectedStars >= 10) {
+                    winGame2();
+                    clearInterval(timer);
+                }
+            }
+        });
+        
+        drawGame2();
+        requestAnimationFrame(updateGame2);
+    }
+    
+    function drawGame2() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Фон
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, "#1a0a2a");
+        gradient.addColorStop(1, "#3a1a5a");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Лабиринт
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                if (maze[y][x] === 1) {
+                    ctx.fillStyle = "#5a4a8a";
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    
+                    // Текстура стен
+                    ctx.fillStyle = "#4a3a7a";
+                    ctx.fillRect(x * cellSize + 5, y * cellSize + 5, cellSize - 10, cellSize - 10);
+                }
+            }
+        }
+        
+        // Звезды
+        stars.forEach(star => {
+            if (!star.collected) {
+                star.pulse += 0.1;
+                const size = 30 + Math.sin(star.pulse) * 5;
+                
+                const starImg = new Image();
+                starImg.src = characterImages.star;
+                ctx.save();
+                ctx.translate(
+                    star.x * cellSize + cellSize/2,
+                    star.y * cellSize + cellSize/2
+                );
+                ctx.rotate(star.pulse * 0.5);
+                ctx.drawImage(starImg, -size/2, -size/2, size, size);
+                ctx.restore();
+                
+                // Свечение
+                ctx.shadowColor = "#ffd700";
+                ctx.shadowBlur = 15;
+                ctx.drawImage(
+                    starImg,
+                    star.x * cellSize + cellSize/2 - size/2,
+                    star.y * cellSize + cellSize/2 - size/2,
+                    size, size
+                );
+                ctx.shadowBlur = 0;
+            }
+        });
+        
+        // Игрок
+        const playerImg = new Image();
+        playerImg.src = characterImages.player2;
+        ctx.drawImage(
+            playerImg,
+            player.x * cellSize + 10,
+            player.y * cellSize + 10,
+            cellSize - 20, cellSize - 20
+        );
+        
+        // След игрока
+        ctx.fillStyle = "rgba(255, 95, 125, 0.3)";
+        ctx.beginPath();
+        ctx.arc(
+            player.x * cellSize + cellSize/2,
+            player.y * cellSize + cellSize/2,
+            15, 0, Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Враги (двигающиеся препятствия)
+        ctx.fillStyle = "#ff5f7d";
+        const enemyX = 7 + Math.sin(Date.now() / 1000) * 3;
+        const enemyY = 7 + Math.cos(Date.now() / 1000) * 2;
+        
+        const enemyImg = new Image();
+        enemyImg.src = characterImages.enemy2;
+        ctx.drawImage(
+            enemyImg,
+            enemyX * cellSize + 5,
+            enemyY * cellSize + 5,
+            cellSize - 10, cellSize - 10
+        );
+        
+        // Столкновение с врагом
+        if (Math.abs(player.x - enemyX) < 0.5 && Math.abs(player.y - enemyY) < 0.5) {
+            lives--;
+            document.getElementById("lives2Count").textContent = lives;
+            player.x = 1;
+            player.y = 1;
+            
+            if (lives <= 0) {
+                loseGame2();
+            }
+        }
+        
+        // Отображение информации
+        ctx.fillStyle = "white";
+        ctx.font = "16px 'Press Start 2P'";
+        ctx.fillText("Воспоминание: Первый поцелуй", 20, 30);
+    }
+    
+    function winGame2() {
+        gameOver = true;
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#ffd700";
+        ctx.font = "40px 'Press Start 2P'";
+        ctx.fillText("ПОБЕДА!", 300, 250);
+        
+        setTimeout(() => {
+            memories[currentMemoryIndex].collected = true;
+            document.getElementById("miniGame2").style.display = "none";
+            scene.style.display = "flex";
+            
+            setBackground(memories[currentMemoryIndex].bg);
+            memoryPhoto.src = "images/memory2.jpg";
+            memoryPhoto.style.display = "block";
+            
+            typeTextHTML(textDiv, "<p class='pulse-text'>✅ ВОСПОМИНАНИЕ СОБРАНО!</p><p>Ты вспомнил тот первый поцелуй... вкус алкоголя, биение сердца...</p>", 30, () => {
+                nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+            });
+        }, 1500);
+    }
+    
+    function loseGame2() {
+        gameOver = true;
+        clearInterval(timer);
+        
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#ff5f7d";
+        ctx.font = "40px 'Press Start 2P'";
+        ctx.fillText("ВРЕМЯ ВЫШЛО", 250, 250);
+        
+        setTimeout(() => {
+            document.getElementById("miniGame2").style.display = "none";
+            scene.style.display = "flex";
+            
+            typeTextHTML(textDiv, "<p>Не удалось собрать воспоминание вовремя...</p>", 30, () => {
+                nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+            });
+        }, 2000);
+    }
+    
+    updateGame2();
+}
+
+function endGame2() {
+    document.getElementById("miniGame2").style.display = "none";
+    scene.style.display = "flex";
+    showHub();
+}
+
+// ===============================
+// МИНИ-ИГРА 3: БИТВА С ТЕНЬЮ
+// ===============================
+function startMiniGame3() {
+    scene.style.display = "none";
+    document.getElementById("miniGame3").style.display = "flex";
+
+    // Меняем музыку на боевую
+    music.pause();
+    music.src = musicFiles.fight;
+    music.play().catch(e => {
+        console.log("Боевая музыка будет включена после взаимодействия");
+        const enableOnClick = () => {
+            music.play().catch(e => console.log("Не удалось включить музыку"));
+            document.removeEventListener('click', enableOnClick);
+            document.removeEventListener('keydown', enableOnClick);
+        };
+        document.addEventListener('click', enableOnClick);
+        document.addEventListener('keydown', enableOnClick);
+    });
+
+    const canvas = document.getElementById("game3Canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    let player = {
+        x: 100,
+        y: 300,
+        width: 100,
+        height: 150,
+        health: 150,
+        speed: 5,
+        facingRight: true,
+        lastMoveDirection: 'right',
+        hasShield: true,
+        shieldActive: false,
+        shieldHealth: 50,
+        shieldCooldown: 0,
+        shieldDuration: 3000,
+        shieldCooldownTime: 5000
+    };
+    
+    let enemy = {
+        x: 600,
+        y: 300,
+        width: 120,
+        height: 180,
+        health: 200,
+        speed: 2
+    };
+    
+    let bullets = [];
+    let enemyBullets = [];
+    let ammo = 30;
+    let lastShot = 0;
+    let reloading = false;
+    let gameOver = false;
+    
+    // Обновляем UI
+    document.getElementById("playerHealth").textContent = player.health;
+    document.getElementById("enemyHealth").textContent = enemy.health;
+    document.getElementById("ammoCount").textContent = ammo;
+    
+    // Управление
+    const keys = {};
+    
+    function handleKeyDown(e) {
+        keys[e.key.toLowerCase()] = true;
+        
+        // Определяем направление движения
+        if (keys['a'] || keys['ф']) player.lastMoveDirection = 'left';
+        if (keys['d'] || keys['в']) player.lastMoveDirection = 'right';
+        
+        // Активация щита (клавиша E)
+        if ((e.key.toLowerCase() === 'e' || e.key.toLowerCase() === 'у') && 
+            player.hasShield && 
+            !player.shieldActive && 
+            player.shieldCooldown <= 0) {
+            player.shieldActive = true;
+            player.shieldCooldown = player.shieldCooldownTime;
+            
+            // Автоматическое отключение щита через заданное время
+            setTimeout(() => {
+                if (player.shieldActive) {
+                    player.shieldActive = false;
+                }
+            }, player.shieldDuration);
+        }
+        
+        // Стрельба в направлении движения
+        if (e.code === "Space" && !reloading && ammo > 0 && Date.now() - lastShot > 200) {
+            let bulletX, bulletY, bulletVx;
+            
+            if (player.lastMoveDirection === 'right') {
+                bulletX = player.x + player.width;
+                bulletVx = 10;
+            } else {
+                bulletX = player.x;
+                bulletVx = -10;
+            }
+            
+            bulletY = player.y + player.height/2;
+            
+            bullets.push({
+                x: bulletX,
+                y: bulletY,
+                vx: bulletVx,
+                vy: 0,
+                direction: player.lastMoveDirection
+            });
+            
+            ammo--;
+            lastShot = Date.now();
+            document.getElementById("ammoCount").textContent = ammo;
+        }
+        
+        // Перезарядка
+        if (e.key.toLowerCase() === 'r' && !reloading) {
+            reloading = true;
+            setTimeout(() => {
+                ammo = 30;
+                reloading = false;
+                document.getElementById("ammoCount").textContent = ammo;
+            }, 2000);
+        }
+    }
+    
+    function handleKeyUp(e) {
+        keys[e.key.toLowerCase()] = false;
+    }
+    
+    // Вешаем обработчики
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    
+    // Локальные функции для победы/поражения
+    function winGame3() {
+        gameOver = true;
+        
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#4CAF50";
+        ctx.font = "40px 'Press Start 2P'";
+        ctx.fillText("ТЕНЬ ПОБЕЖДЕНА", 200, 250);
+        
+        setTimeout(() => {
+            memories[currentMemoryIndex].collected = true;
+            document.getElementById("miniGame3").style.display = "none";
+            
+            const allCollected = memories.every(m => m.collected);
+            if (allCollected) {
+                music.pause();
+                music.src = musicFiles.main;
+                music.play().catch(e => console.log("Не удалось включить музыку"));
+                showFinalKissScene();
+            } else {
+                scene.style.display = "flex";
+                setBackground(memories[currentMemoryIndex].bg);
+                memoryPhoto.src = "images/memory3.jpg";
+                memoryPhoto.style.display = "block";
+                
+                music.pause();
+                music.src = musicFiles.main;
+                music.play().catch(e => console.log("Не удалось включить музыку"));
+                
+                typeTextHTML(textDiv, "<p class='pulse-text'>✅ ВОСПОМИНАНИЕ СОБРАНО!</p><p>Ты вспомнил, как всё начиналось...</p>", 30, () => {
+                    nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+                });
+            }
+        }, 2000);
+    }
+    
+    function loseGame3() {
+        gameOver = true;
+        
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#ff5f7d";
+        ctx.font = "40px 'Press Start 2P'";
+        ctx.fillText("ВЫ ПРОИГРАЛИ", 250, 250);
+        
+        setTimeout(() => {
+            document.getElementById("miniGame3").style.display = "none";
+            scene.style.display = "flex";
+            
+            music.pause();
+            music.src = musicFiles.main;
+            music.play().catch(e => console.log("Не удалось включить музыку"));
+            
+            typeTextHTML(textDiv, "<p>Тень оказалась сильнее...</p><p>Попробуй еще раз!</p>", 30, () => {
+                nextButton("ВЕРНУТЬСЯ В ХАБ", showHub);
+            });
+        }, 2000);
+    }
+    
+    function updateGame3() {
+        if (gameOver) {
+            requestAnimationFrame(updateGame3);
+            return;
+        }
+        
+        // Обновление перезарядки щита
+        if (player.shieldCooldown > 0) {
+            player.shieldCooldown -= 16.67;
+        }
+        
+        // Движение игрока
+        if (keys['w'] || keys['ц']) player.y -= player.speed;
+        if (keys['s'] || keys['ы']) player.y += player.speed;
+        if (keys['a'] || keys['ф']) {
+            player.x -= player.speed;
+            player.lastMoveDirection = 'left';
+        }
+        if (keys['d'] || keys['в']) {
+            player.x += player.speed;
+            player.lastMoveDirection = 'right';
+        }
+        
+        // Ограничение игрока
+        player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+        player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+        
+        // Движение врага (преследование)
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (dist > 0) {
+            enemy.x += (dx / dist) * enemy.speed;
+            enemy.y += (dy / dist) * enemy.speed;
+        }
+        
+        // Выстрелы врага
+        if (Math.random() < 0.02 && enemyBullets.length < 3) {
+            const angle = Math.atan2(
+                player.y + player.height/2 - (enemy.y + enemy.height/2),
+                player.x + player.width/2 - (enemy.x + enemy.width/2)
+            );
+            
+            enemyBullets.push({
+                x: enemy.x,
+                y: enemy.y + enemy.height/2,
+                vx: Math.cos(angle) * 6,
+                vy: Math.sin(angle) * 6
+            });
+        }
+        
+        // Обновление пуль игрока
+        bullets = bullets.filter(bullet => {
+            bullet.x += bullet.vx;
+            
+            if (bullet.x > enemy.x && bullet.x < enemy.x + enemy.width &&
+                bullet.y > enemy.y && bullet.y < enemy.y + enemy.height) {
+                enemy.health -= 10;
+                document.getElementById("enemyHealth").textContent = enemy.health;
+                
+                if (enemy.health <= 0) {
+                    winGame3();
+                }
+                return false;
+            }
+            
+            return bullet.x > -50 && bullet.x < canvas.width + 50;
+        });
+        
+        // Обновление пуль врага
+        enemyBullets = enemyBullets.filter(bullet => {
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+            
+            // Проверка столкновения пули с щитом
+            if (player.shieldActive && player.shieldHealth > 0) {
+                let shieldX, shieldY, shieldWidth, shieldHeight;
+                
+                if (player.lastMoveDirection === 'right') {
+                    shieldX = player.x + player.width - 10;
+                    shieldY = player.y + 30;
+                    shieldWidth = 25;
+                    shieldHeight = 90;
+                } else {
+                    shieldX = player.x - 15;
+                    shieldY = player.y + 30;
+                    shieldWidth = 25;
+                    shieldHeight = 90;
+                }
+                
+                if (bullet.x > shieldX && bullet.x < shieldX + shieldWidth &&
+                    bullet.y > shieldY && bullet.y < shieldY + shieldHeight) {
+                    
+                    player.shieldHealth -= 10;
+                    
+                    // Эффект отражения пули
+                    bullet.vx = -bullet.vx * 0.5;
+                    bullet.vy = -bullet.vy * 0.5;
+                    
+                    if (player.shieldHealth <= 0) {
+                        player.shieldActive = false;
+                        player.hasShield = false;
+                    }
+                    
+                    return true;
+                }
+            }
+            
+            // Проверка попадания в игрока
+            if (bullet.x > player.x && bullet.x < player.x + player.width &&
+                bullet.y > player.y && bullet.y < player.y + player.height) {
+                
+                player.health -= 15;
+                document.getElementById("playerHealth").textContent = player.health;
+                
+                if (player.health <= 0) {
+                    loseGame3();
+                }
+                return false;
+            }
+            
+            return bullet.x > -50 && bullet.x < canvas.width + 50;
+        });
+        
+        drawGame3();
+        requestAnimationFrame(updateGame3);
+    }
+    
+    function drawGame3() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Фон битвы
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, "#2a0a1a");
+        gradient.addColorStop(1, "#5a1a3a");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Платформы
+        ctx.fillStyle = "#8a4a6a";
+        ctx.fillRect(0, 450, canvas.width, 150);
+        
+        ctx.fillStyle = "#7a3a5a";
+        for (let i = 0; i < 5; i++) {
+            ctx.fillRect(150 * i, 300, 100, 30);
+        }
+        
+        // Щит (если активен)
+        if (player.shieldActive && player.shieldHealth > 0) {
+            let shieldX, shieldY, shieldWidth, shieldHeight;
+            
+            if (player.lastMoveDirection === 'right') {
+                shieldX = player.x + player.width - 10;
+                shieldY = player.y + 30;
+                shieldWidth = 25;
+                shieldHeight = 90;
+            } else {
+                shieldX = player.x - 15;
+                shieldY = player.y + 30;
+                shieldWidth = 25;
+                shieldHeight = 90;
+            }
+            
+            const shieldGradient = ctx.createLinearGradient(
+                shieldX, shieldY, 
+                shieldX + shieldWidth, shieldY + shieldHeight
+            );
+            
+            if (player.shieldHealth > 25) {
+                shieldGradient.addColorStop(0, "#00ffff");
+                shieldGradient.addColorStop(1, "#0088ff");
+            } else {
+                shieldGradient.addColorStop(0, "#ff4444");
+                shieldGradient.addColorStop(1, "#ff0000");
+            }
+            
+            ctx.fillStyle = shieldGradient;
+            ctx.globalAlpha = 0.7;
+            ctx.fillRect(shieldX, shieldY, shieldWidth, shieldHeight);
+            
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(shieldX, shieldY, shieldWidth, shieldHeight);
+            
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 15;
+            ctx.strokeRect(shieldX, shieldY, shieldWidth, shieldHeight);
+            ctx.shadowBlur = 0;
+            
+            ctx.globalAlpha = 1.0;
+        }
+        
+        // Игрок
+        const playerImg = new Image();
+        playerImg.src = characterImages.player3;
+        
+        ctx.save();
+        if (player.lastMoveDirection === 'left') {
+            ctx.scale(-1, 1);
+            ctx.drawImage(playerImg, -player.x - player.width, player.y, player.width, player.height);
+        } else {
+            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        }
+        ctx.restore();
+        
+        // Враг
+        const enemyImg = new Image();
+        enemyImg.src = characterImages.enemy3;
+        ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+        
+        // Пульсация врага
+        ctx.shadowColor = "#ff5f7d";
+        ctx.shadowBlur = 20;
+        ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+        ctx.shadowBlur = 0;
+        
+        // Пули игрока
+        bullets.forEach(bullet => {
+            const bulletImg = new Image();
+            bulletImg.src = characterImages.bullet;
+            
+            ctx.save();
+            if (bullet.direction === 'left') {
+                ctx.scale(-1, 1);
+                ctx.drawImage(bulletImg, -bullet.x - 30, bullet.y, 30, 15);
+            } else {
+                ctx.drawImage(bulletImg, bullet.x, bullet.y, 30, 15);
+            }
+            ctx.restore();
+            
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 10;
+            if (bullet.direction === 'left') {
+                ctx.scale(-1, 1);
+                ctx.drawImage(bulletImg, -bullet.x - 30, bullet.y, 30, 15);
+                ctx.scale(-1, 1);
+            } else {
+                ctx.drawImage(bulletImg, bullet.x, bullet.y, 30, 15);
+            }
+            ctx.shadowBlur = 0;
+        });
+        
+        // Пули врага
+        enemyBullets.forEach(bullet => {
+            const bulletImg = new Image();
+            bulletImg.src = characterImages.enemyBullet;
+            ctx.drawImage(bulletImg, bullet.x, bullet.y, 30, 15);
+            
+            ctx.shadowColor = "#ff5f7d";
+            ctx.shadowBlur = 10;
+            ctx.drawImage(bulletImg, bullet.x, bullet.y, 30, 15);
+            ctx.shadowBlur = 0;
+        });
+        
+        // Статус перезарядки
+        if (reloading) {
+            ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
+            ctx.fillRect(player.x, player.y - 30, 100, 20);
+            ctx.fillStyle = "white";
+            ctx.font = "12px 'Press Start 2P'";
+            ctx.fillText("ПЕРЕЗАРЯДКА", player.x, player.y - 15);
+        }
+        
+        // Отображение статуса щита
+        if (player.hasShield) {
+            ctx.fillStyle = "rgba(0, 255, 255, 0.3)";
+            ctx.fillRect(player.x, player.y - 60, 100, 20);
+            ctx.fillStyle = "white";
+            ctx.font = "10px 'Press Start 2P'";
+            
+            if (player.shieldActive) {
+                ctx.fillText("ЩИТ: " + player.shieldHealth, player.x + 10, player.y - 45);
+            } else if (player.shieldCooldown > 0) {
+                const cooldownSec = Math.ceil(player.shieldCooldown / 1000);
+                ctx.fillText("ЩИТ: " + cooldownSec + "с", player.x + 10, player.y - 45);
+            } else {
+                ctx.fillText("ЩИТ ГОТОВ", player.x + 10, player.y - 45);
+            }
+        }
+        
+        // Подсказка управления
+        ctx.fillStyle = "#ff9a9e";
+        ctx.font = "12px 'Press Start 2P'";
+        ctx.fillText("A/D - движение + направление стрельбы", 20, 570);
+        ctx.fillText("SPACE - стрельба | R - перезарядка | E - щит", 20, 590);
+        
+        // Отображение информации
+        ctx.fillStyle = "white";
+        ctx.font = "16px 'Press Start 2P'";
+        ctx.fillText("Воспоминание: Начало истории", 20, 30);
+    }
+    
+    // ЗАПУСКАЕМ ИГРУ!
+    updateGame3();
+}
+
+function endGame3() {
+    document.getElementById("miniGame3").style.display = "none";
+    scene.style.display = "flex";
+    music.pause();
+    music.src = musicFiles.main;
+    music.play().catch(e => {
+        console.log("Музыка будет включена после взаимодействия");
+    });
+    showHub();
+}
+// ===============================
+// ФИНАЛЬНАЯ СЦЕНА С ПРОБУЖДЕНИЕМ
+// ===============================
+function showFinalKissScene() {
+    scene.style.display = "none";
+    hub.style.display = "none";
+    finalKissScene.style.display = "flex";
+    
+    // Очищаем предыдущие элементы
+    const kissContainer = document.querySelector('.kiss-container');
+    if (kissContainer) {
+        kissContainer.innerHTML = '';
+    }
+    
+    // Создаем контейнер для анимации
+    const container = document.createElement('div');
+    container.className = 'kiss-container';
+    container.style.cssText = `
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    `;
+    
+    // Фон
+    const background = document.createElement('img');
+    background.className = 'kiss-background';
+    background.src = "images/backgrounds/kiss_bg.jpg";
+    background.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.8;
+        filter: blur(3px);
+        z-index: 1;
+    `;
+    
+    // Фото поцелуя
+    const kissImage = document.createElement('img');
+    kissImage.id = 'kissMainImage';
+    kissImage.src = "images/characters/kiss.png";
+    kissImage.alt = "Поцелуй";
+    kissImage.style.cssText = `
+        position: relative;
+        width: 300px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 20px;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 50px rgba(255, 95, 125, 0.5);
+        z-index: 2;
+        transform: scale(0.1);
+        opacity: 0;
+        transition: all 6s ease-out;
+    `;
+    
+    // Текст
+    const textDiv = document.createElement('div');
+    textDiv.id = 'kissText';
+    textDiv.style.cssText = `
+        position: absolute;
+        bottom: 100px;
+        z-index: 3;
+        color: white;
+        font-size: 24px;
+        text-shadow: 2px 2px 4px #000;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 80%;
+        opacity: 0;
+        transition: opacity 2s;
+    `;
+    
+    // Собираем контейнер
+    container.appendChild(background);
+    container.appendChild(kissImage);
+    container.appendChild(textDiv);
+    
+    // Очищаем и добавляем новый контейнер
+    const existingContainer = document.querySelector('.kiss-container');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Добавляем кнопку продолжения
+    const controlsDiv = document.querySelector('.game-controls');
+    if (controlsDiv) {
+        controlsDiv.innerHTML = '';
+        const continueBtn = document.createElement('button');
+        continueBtn.textContent = 'ПРОСНУТЬСЯ...';
+        continueBtn.onclick = showWakeUpScene;
+        continueBtn.style.cssText = `
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(145deg, #6a11cb, #2575fc);
+            border: 2px solid #fff;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 3s;
+        `;
+        controlsDiv.appendChild(continueBtn);
+        
+        // Показываем кнопку позже
+        setTimeout(() => {
+            continueBtn.style.opacity = '1';
+        }, 10000);
+    }
+    
+    finalKissScene.insertBefore(container, finalKissScene.firstChild);
+    
+    // Запускаем анимацию
+    setTimeout(() => {
+        // 1. Появление и увеличение фото
+        kissImage.style.transform = 'scale(0.8)';
+        kissImage.style.opacity = '1';
+        kissImage.style.width = '600px';
+        kissImage.style.height = '600px';
+        kissImage.style.boxShadow = '0 0 60px rgba(255, 95, 125, 0.8)';
+        
+        // 2. Показываем текст с задержкой
+        setTimeout(() => {
+            textDiv.style.opacity = '1';
+            showKissMessages();
+        }, 2000);
+        
+        // 3. Добавляем эффекты
+        createHeartEffects();
+        
+    }, 500);
+    
+    let messageIndex = 0;
+    const messages = [
+        "Все воспоминания собраны...",
+        "Её образ становится яснее с каждым мгновением...",
+        "Ты чувствуешь тепло её рук, как тогда...",
+        "Её запах... звук голоса... улыбка...",
+        "И вот она перед тобой, настоящая...",
+        "Твоя любовь вернула её из тьмы..."
+    ];
+    
+    function showKissMessages() {
+        if (messageIndex < messages.length) {
+            typeTextHTML(textDiv, messages[messageIndex], 40, () => {
+                messageIndex++;
+                if (messageIndex < messages.length) {
+                    setTimeout(() => {
+                        textDiv.innerHTML = '';
+                        setTimeout(() => {
+                            showKissMessages();
+                        }, 500);
+                    }, 1500);
+                } else {
+                    // Последнее сообщение
+                    setTimeout(() => {
+                        typeTextHTML(textDiv, 
+                            "<p class='pulse-text' style='font-size: 28px; color: #ff9a9e;'> ТЫ СМОГ </p>", 
+                            30
+                        );
+                    }, 1000);
+                }
+            });
+        }
+    }
+    
+    function createHeartEffects() {
+        // Создаем падающие сердечки
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                heart.style.cssText = `
+                    position: fixed;
+                    top: -50px;
+                    left: ${Math.random() * 100}vw;
+                    font-size: ${15 + Math.random() * 20}px;
+                    color: #ff5f7d;
+                    opacity: ${0.3 + Math.random() * 0.5};
+                    z-index: 2;
+                    pointer-events: none;
+                    animation: fallHeart ${2 + Math.random() * 3}s linear forwards;
+                `;
+                
+                document.body.appendChild(heart);
+                
+                // Удаляем через 5 секунд
+                setTimeout(() => {
+                    if (heart.parentNode) heart.remove();
+                }, 5000);
+                
+            }, i * 300);
+        }
+        
+        // Добавляем CSS анимацию для сердечек
+        if (!document.querySelector('#heart-styles')) {
+            const style = document.createElement('style');
+            style.id = 'heart-styles';
+            style.textContent = `
+                @keyframes fallHeart {
+                    0% {
+                        transform: translateY(0) rotate(0deg) scale(0.5);
+                        opacity: 0;
+                    }
+                    10% {
+                        opacity: 0.7;
+                        transform: scale(0.8);
+                    }
+                    90% {
+                        opacity: 0.7;
+                    }
+                    100% {
+                        transform: translateY(100vh) rotate(360deg) scale(0.5);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+}
+
+// ===============================
+// СЦЕНА ПРОБУЖДЕНИЯ
+// ===============================
+function showWakeUpScene() {
+    finalKissScene.style.display = "none";
+    wakeUpScene.style.display = "flex";
+    
+    // Очищаем предыдущий контент
+    wakeupText.innerHTML = '';
+    
+    // Устанавливаем фон
+    const wakeupBg = document.querySelector('.wakeup-background');
+    if (wakeupBg) {
+        wakeupBg.src = "images/backgrounds/wakeup_bg.jpg";
+    }
+    
+    // Анимация пробуждения
+    let wakeupStep = 0;
+    const wakeupMessages = [
+        "Ты медленно открываешь глаза...",
+        "Утро. Солнечные лучи пробиваются сквозь шторы...",
+        "Ты поворачиваешь голову на бок...",
+        "И видишь её...",
+        "Она спит рядом, тихо дыша...",
+        "Её рука лежит на твоей груди...",
+        "Твоё сердце замирает на мгновение...",
+        "Потом начинает биться сильнее...",
+        "Она здесь. Она настоящая.",
+        "Ты нежно касаешься её щеки...",
+        "Она улыбается во сне и прижимается ближе...",
+        "«Я нашёл тебя...» - шепчешь ты.",
+        "«Я всегда с тобой, Любовь...» - будто слышишь в ответ."
+    ];
+    
+    function showNextWakeupMessage() {
+        if (wakeupStep < wakeupMessages.length) {
+            const p = document.createElement('p');
+            wakeupText.appendChild(p);
+            
+            // Добавляем отступ для новых абзацев
+            if (wakeupStep > 0) {
+                p.style.marginTop = '15px';
+            }
+            
+            // Анимация появления текста
+            p.style.opacity = '0';
+            p.style.transform = 'translateY(20px)';
+            p.style.transition = 'all 0.8s ease-out';
+            
+            typeTextElement(p, wakeupMessages[wakeupStep], 40, () => {
+                // Анимация появления абзаца
+                setTimeout(() => {
+                    p.style.opacity = '1';
+                    p.style.transform = 'translateY(0)';
+                    
+                    wakeupStep++;
+                    if (wakeupStep < wakeupMessages.length) {
+                        setTimeout(showNextWakeupMessage, 1500);
+                    } else {
+                        // Финальное сообщение
+                        setTimeout(() => {
+                            const finalP = document.createElement('p');
+                            finalP.className = 'pulse-text';
+                            finalP.style.cssText = `
+                                font-size: 28px;
+                                color: #ff9a9e;
+                                margin-top: 30px;
+                                text-shadow: 0 0 10px #ff5f7d;
+                            `;
+                            wakeupText.appendChild(finalP);
+                            typeTextElement(finalP, "и жили они Долго и Счастливо ", 50);
+                            
+                            // Показываем кнопку "Начать заново"
+                            setTimeout(() => {
+                                const restartBtn = document.querySelector('#wakeUpScene .game-controls button');
+                                if (restartBtn) {
+                                    restartBtn.style.opacity = '1';
+                                    restartBtn.style.transform = 'scale(1)';
+                                    restartBtn.style.transition = 'all 0.5s ease-out';
+                                }
+                            }, 2000);
+                        }, 1000);
+                    }
+                }, 300);
+            });
+        }
+    }
+    
+    // Функция для печати текста в элемент
+    function typeTextElement(element, text, speed, callback) {
+        element.innerHTML = '';
+        let index = 0;
+        
+        function typeChar() {
+            if (index < text.length) {
+                element.innerHTML += text.charAt(index);
+                index++;
+                setTimeout(typeChar, speed);
+            } else if (callback) {
+                callback();
+            }
+        }
+        
+        typeChar();
+    }
+    
+    // Начинаем анимацию
+    setTimeout(showNextWakeupMessage, 1000);
+}
+
+// ===============================
+// ПЕРЕЗАПУСК ИГРЫ
+// ===============================
+function restartGame() {
+    // Сброс всех состояний
+    gameStarted = false;
+    currentMemoryIndex = 0;
+    
+    memories.forEach(mem => {
+        mem.collected = false;
+    });
+    
+    // Скрываем все сцены
+    finalKissScene.style.display = "none";
+    wakeUpScene.style.display = "none";
+    
+    // Показываем экран загрузки
+    loadingScreen.style.display = "flex";
+    loadingScreen.style.opacity = '1';
+    loadingText.textContent = "Возвращение в сон...";
+    
+    // Эффект затухания
+    setTimeout(() => {
+        loadingScreen.style.display = "none";
+        scene.style.display = "flex";
+        
+        // Сброс музыки
+        music.pause();
+        music.currentTime = 0;
+        
+        // Запуск заново
+        setBackground("start");
+        typeTextHTML(textDiv, "<p class='pulse-text'>А может это все сон?</p><p>Нажмите, чтобы начать...</p>", 40, () => {
+            nextButton("НАЧАТЬ СНОВА", startGameWithMusic);
+        });
+    }, 1500);
+}
+
+// ===============================
+// ЗАПУСК ИГРЫ ПРИ ЗАГРУЗКЕ
+// ===============================
+window.onload = init;
+</script>
+</body>
+</html>
